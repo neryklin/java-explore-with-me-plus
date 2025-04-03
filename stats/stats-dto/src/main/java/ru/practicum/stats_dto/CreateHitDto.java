@@ -5,9 +5,6 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.time.LocalDateTime;
-
-
 @Getter
 @Setter
 @Builder
@@ -28,6 +25,6 @@ public class CreateHitDto {
     String ip;
 
     @NotNull
-    LocalDateTime timestamp;
+    String timestamp;
 
 }
