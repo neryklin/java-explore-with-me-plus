@@ -14,17 +14,19 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class StatsClient {
+public class StatsClient implements StatsClientInterface {
 
     private final RestTemplate restTemplate;
 
     @Value("${stats-server.url:http://localhost:9090}")
     private String baseUrl;
 
+    @Override
     public void sendHit(CreateHitDto hitDto) {
         restTemplate.postForEntity(baseUrl + "/hit", hitDto, Void.class);
     }
 
+    @Override
     public List<ResponseStatsDto> getStats(CreateStatsDto statsDto) {
         UriComponentsBuilder builder = UriComponentsBuilder
                 .fromHttpUrl(baseUrl + "/stats")
