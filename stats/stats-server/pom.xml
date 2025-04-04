@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>stats-server</artifactId>
+    <name>Stats server</name>
 
     <properties>
         <maven.compiler.source>22</maven.compiler.source>
@@ -76,4 +77,5 @@
             </plugin>
         </plugins>
     </build>
+
 </project>
