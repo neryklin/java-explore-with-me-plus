@@ -1,7 +1,5 @@
 package ru.practicum.user.model;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.practicum.user.dto.UserDto;
 import ru.practicum.user.dto.UserShortDto;
