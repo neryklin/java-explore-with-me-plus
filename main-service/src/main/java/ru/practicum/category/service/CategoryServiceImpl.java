@@ -1,5 +1,6 @@
 package ru.practicum.category.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.category.dto.CategoryDto;
@@ -7,7 +8,6 @@ import ru.practicum.category.model.Category;
 import ru.practicum.category.model.MapperCategory;
 import ru.practicum.category.repository.CategoryRepository;
 
-import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.stream.Collectors;
 
