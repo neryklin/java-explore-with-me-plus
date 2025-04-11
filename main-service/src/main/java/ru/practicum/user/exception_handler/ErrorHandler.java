@@ -39,6 +39,7 @@ public class ErrorHandler {
         BindingResult bindingResult = e.getBindingResult();
         String field = null;
         String rejectedValue = null;
+        String reason = e.getBindingResult().getAllErrors().getFirst().getDefaultMessage();
 
         for (FieldError fieldError : bindingResult.getFieldErrors()) {
             field = fieldError.getField();
@@ -47,12 +48,6 @@ public class ErrorHandler {
             }
         }
 
-        String reason = e.getBindingResult().getFieldErrors().stream()
-                .map(FieldError::getDefaultMessage)
-                .filter(Objects::nonNull)
-                .findFirst()
-                .orElse(e.getLocalizedMessage());
-
         String message = "field: " + field + " " + reason + " rejected value: " + rejectedValue;
         return new ApiError(HttpStatus.BAD_REQUEST, "Incorrectly made request.", message, LocalDateTime.now());
     }
@@ -60,6 +55,7 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
     public ApiError emailAlreadyExist(final DataIntegrityViolationException e) {
+        log.debug("409 {}", e.getMessage(), e);
         String message = e.getLocalizedMessage();
         return new ApiError(HttpStatus.CONFLICT, "Integrity constraint has been violated.", message, LocalDateTime.now());
     }
@@ -67,6 +63,7 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ApiError notFoundUser(final NotFoundUserException e) {
+        log.debug("404 {}", e.getMessage(), e);
         return new ApiError(HttpStatus.NOT_FOUND, e.getReason(), e.getMessage(), LocalDateTime.now());
     }
 }
