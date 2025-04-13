@@ -14,7 +14,7 @@ import ru.practicum.user.model.User;
 @Component
 public class MapperEvent {
 
-    public EventFullDto toEventFullDto(Event event) {
+    public static EventFullDto toEventFullDto(Event event) {
         return EventFullDto.builder()
                 .id(event.getId())
                 .annotation(event.getAnnotation())
@@ -35,7 +35,7 @@ public class MapperEvent {
                 .build();
     }
 
-    public Event toEvent(NewEventDto newEventDto, Category category, User initiator) {
+    public static Event toEvent(NewEventDto newEventDto, Category category, User initiator) {
         return Event.builder()
                 .id(0L)
                 .annotation(newEventDto.getAnnotation())
@@ -54,7 +54,7 @@ public class MapperEvent {
                 .build();
     }
 
-    public EventShortDto toEventShortDto(Event event) {
+    public static EventShortDto toEventShortDto(Event event) {
         return EventShortDto.builder()
                 .id(event.getId())
                 .annotation(event.getAnnotation())
