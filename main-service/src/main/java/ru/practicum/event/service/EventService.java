@@ -2,12 +2,10 @@ package ru.practicum.event.service;
 
 
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.event.dto.EventFullDto;
-import ru.practicum.event.dto.EventShortDto;
-import ru.practicum.event.dto.NewEventDto;
-import ru.practicum.event.dto.UpdateEventUserRequest;
+import ru.practicum.event.dto.*;
 
 import java.util.Collection;
+import java.util.List;
 
 @Transactional(readOnly = true)
 public interface EventService {

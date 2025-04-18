@@ -1,48 +1,27 @@
 package ru.practicum.event.service;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-import ru.practicum.category.model.Category;
-import ru.practicum.category.repository.CategoryRepository;
-import ru.practicum.event.dto.EventFullDto;
-import ru.practicum.event.dto.EventShortDto;
-import ru.practicum.event.dto.NewEventDto;
-import ru.practicum.event.dto.UpdateEventUserRequest;
-import ru.practicum.event.enums.StateActionUser;
-import ru.practicum.event.model.Event;
-import ru.practicum.event.model.EventState;
-import ru.practicum.event.model.MapperEvent;
-import ru.practicum.event.repository.EventRepository;
-import ru.practicum.event.repository.LocationRepository;
-import ru.practicum.exception.ConflictException;
-import ru.practicum.exception.EventDateValidationException;
-import ru.practicum.exception.NotFoundException;
-import ru.practicum.location.model.Location;
-import ru.practicum.user.model.User;
-import ru.practicum.user.repository.UserRepository;
-
 import com.querydsl.core.types.dsl.BooleanExpression;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 import ru.practicum.category.model.Category;
+import ru.practicum.category.repository.CategoryRepository;
 import ru.practicum.category.service.CategoryService;
-import ru.practicum.event.dto.EventFullDto;
-import ru.practicum.event.dto.EventSearchParameters;
-import ru.practicum.event.dto.UpdateEventDto;
+import ru.practicum.event.dto.*;
+import ru.practicum.event.enums.StateActionUser;
 import ru.practicum.event.model.*;
 import ru.practicum.event.repository.EventRepository;
-import ru.practicum.exception.InvalidDateException;
-import ru.practicum.exception.InvalidStateException;
-
+import ru.practicum.event.repository.LocationRepository;
+import ru.practicum.exception.*;
+import ru.practicum.location.model.Location;
+import ru.practicum.user.model.User;
+import ru.practicum.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -57,6 +36,7 @@ public class EventServiceImpl implements EventService {
     private final LocationRepository locationRepository;
     private final EventRepository eventRepository;//  private final
     private final RestTemplate restTemplate = new RestTemplate();
+    private final CategoryService categoryService;
 
     @Override
     public EventFullDto create(Long userId, NewEventDto newEventDto) {

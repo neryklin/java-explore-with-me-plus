@@ -29,20 +29,20 @@ public class EventAdminController {
                                   @RequestParam(required = false) List<String> states,
                                   @RequestParam(required = false) List<Long> categories,
                                   @RequestParam(required = false)
-                                      @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeStart,
+                                  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeStart,
                                   @RequestParam(required = false)
-                                      @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
+                                  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
                                   @RequestParam(required = false, defaultValue = "0") @PositiveOrZero Integer from,
                                   @RequestParam(required = false, defaultValue = "10") @Positive Integer size) {
         log.info("Запрос списка событий: usersId {}, states {}, categoriesOd {}, rangeStart {}," +
-                " rangeEnd {}, from {}, size {}", users, states, categories, rangeStart,
+                        " rangeEnd {}, from {}, size {}", users, states, categories, rangeStart,
                 rangeEnd, from, size);
 
         List<EventState> statesValues = null;
         if (states != null) {
             statesValues = states.stream()
-                .map(EventState::valueOf)
-                .toList();
+                    .map(EventState::valueOf)
+                    .toList();
         }
 
         EventSearchParameters parameters = new EventSearchParameters(users, statesValues, categories, rangeStart,
