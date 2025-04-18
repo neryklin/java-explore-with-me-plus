@@ -1,5 +1,6 @@
-package ru.practicum.user.exception_handler;
+package ru.practicum.exception_handler;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -9,7 +10,9 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.practicum.user.exception.NotFoundUserException;
+import ru.practicum.exception.InvalidDateException;
+import ru.practicum.exception.InvalidStateException;
+import ru.practicum.exception_handler.dto.ApiError;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -29,7 +32,7 @@ public class ErrorHandler {
         e.printStackTrace(pw);
         String stackTrace = sw.toString();
         log.warn(stackTrace);
-        return new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, "Ошибка на сервере", e.getMessage(), LocalDateTime.now());
+        return new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), stackTrace, LocalDateTime.now());
     }
 
     @ExceptionHandler
@@ -62,8 +65,23 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ApiError notFoundUser(final NotFoundUserException e) {
+    public ApiError notFoundExceptionHandler(final EntityNotFoundException e) {
         log.debug("404 {}", e.getMessage(), e);
-        return new ApiError(HttpStatus.NOT_FOUND, e.getReason(), e.getMessage(), LocalDateTime.now());
+        return new ApiError(HttpStatus.NOT_FOUND, "Запись не найдена", e.getMessage(), LocalDateTime.now());
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiError invalidDateExceptionHandler(final InvalidDateException e) {
+        log.debug("409 {}", e.getMessage());
+        return new ApiError(HttpStatus.BAD_REQUEST, "Ошибка в дате", e.getMessage(), LocalDateTime.now());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiError invalidStateExceptionHandler(final InvalidStateException e) {
+        log.debug("409 {}", e.getMessage());
+        return new ApiError(HttpStatus.BAD_REQUEST, "Ошибка в статусе", e.getMessage(), LocalDateTime.now());
+    }
+
 }

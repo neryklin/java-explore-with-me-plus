@@ -1,5 +1,6 @@
 package ru.practicum.user.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -8,7 +9,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.user.dto.UserDto;
 import ru.practicum.user.dto.UserParam;
-import ru.practicum.user.exception.NotFoundUserException;
 import ru.practicum.user.model.MapperUser;
 import ru.practicum.user.model.User;
 import ru.practicum.user.repository.UserRepository;
@@ -49,7 +49,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto findUserById(UserParam params) {
         User user = userRepository.findById(params.userId())
-                .orElseThrow(() -> new NotFoundUserException("пользователь не найден по id"));
+                .orElseThrow(() -> new EntityNotFoundException("пользователь не найден по id"));
         return MapperUser.toUserDto(user);
     }
 
@@ -72,7 +72,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto findUserByEmail(UserParam params) {
         User user = userRepository.findByEmail(params.email())
-                .orElseThrow(() -> new NotFoundUserException("пользователь не найден по Email"));
+                .orElseThrow(() -> new EntityNotFoundException("пользователь не найден по Email"));
         return MapperUser.toUserDto(user);
     }
 
