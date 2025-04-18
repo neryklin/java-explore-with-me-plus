@@ -27,7 +27,6 @@ import ru.practicum.user.model.User;
 import ru.practicum.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 
@@ -45,7 +44,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventFullDto create(Long userId, NewEventDto newEventDto) {
-        if (newEventDto.getEventDate() != null && !newEventDto.getEventDate().isAfter(LocalDateTime.now().plus(2, ChronoUnit.HOURS))) {
+        if (newEventDto.getEventDate() != null && !newEventDto.getEventDate().isAfter(LocalDateTime.now().plusHours(2))) {
             throw new EventDateValidationException("Event date 2+ hours after now");
         }
         Category category = categoryRepository.findById(newEventDto.getCategory())
@@ -95,7 +94,7 @@ public class EventServiceImpl implements EventService {
 
         Location location = locationRepository.save(updateEventUserRequest.getLocation());
 
-        if (updateEventUserRequest.getEventDate() != null && !updateEventUserRequest.getEventDate().isAfter(LocalDateTime.now().plus(2, ChronoUnit.HOURS))) {
+        if (updateEventUserRequest.getEventDate() != null && !updateEventUserRequest.getEventDate().isAfter(LocalDateTime.now().plusHours(2))) {
             throw new EventDateValidationException("Event date 2+ hours after now");
         }
 
