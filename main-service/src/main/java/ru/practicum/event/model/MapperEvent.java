@@ -7,12 +7,16 @@ import ru.practicum.category.model.MapperCategory;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventShortDto;
 import ru.practicum.event.dto.NewEventDto;
+import ru.practicum.event.dto.UpdateEventUserRequest;
+import ru.practicum.event.enums.StateActionUser;
+import ru.practicum.location.model.Location;
 import ru.practicum.user.model.MapperUser;
 import ru.practicum.user.model.User;
 
 
 @Component
 public class MapperEvent {
+
 
     public static EventFullDto toEventFullDto(Event event) {
         return EventFullDto.builder()
@@ -66,5 +70,48 @@ public class MapperEvent {
                 .title(event.getTitle())
                 .views(event.getViews())
                 .build();
+    }
+
+    public static void updateFromDto(
+            Event event,
+            UpdateEventUserRequest updateEventUserRequest,
+            Category category,
+            Location location
+    ) {
+        if (updateEventUserRequest.getAnnotation() != null) {
+            event.setAnnotation(updateEventUserRequest.getAnnotation());
+        }
+        if (updateEventUserRequest.getDescription() != null) {
+            event.setDescription(updateEventUserRequest.getDescription());
+        }
+        if (updateEventUserRequest.getEventDate() != null) {
+            event.setEventDate(updateEventUserRequest.getEventDate());
+        }
+        if (updateEventUserRequest.getPaid() != null) {
+            event.setPaid(updateEventUserRequest.getPaid());
+        }
+        if (updateEventUserRequest.getParticipantLimit() != null) {
+            event.setParticipantLimit(updateEventUserRequest.getParticipantLimit());
+        }
+        if (updateEventUserRequest.getRequestModeration() != null) {
+            event.setRequestModeration(updateEventUserRequest.getRequestModeration());
+        }
+        if (updateEventUserRequest.getStateAction() != null
+                && updateEventUserRequest.getStateAction() == StateActionUser.SEND_TO_REVIEW) {
+            event.setState(EventState.PENDING);
+        }
+        if (updateEventUserRequest.getStateAction() != null
+                && updateEventUserRequest.getStateAction() == StateActionUser.CANCEL_REVIEW) {
+            event.setState(EventState.CANCELED);
+        }
+        if (updateEventUserRequest.getTitle() != null) {
+            event.setTitle(updateEventUserRequest.getTitle());
+        }
+        if (category != null) {
+            event.setCategory(category);
+        }
+        if (location != null) {
+            event.setLocation(location);
+        }
     }
 }
