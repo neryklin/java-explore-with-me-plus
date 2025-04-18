@@ -1,4 +1,4 @@
-package ru.practicum.user.exception_handler;
+package ru.practicum.exception_handler.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
