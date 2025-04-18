@@ -1,7 +1,13 @@
 package ru.practicum.event.service;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
+
+import com.querydsl.jpa.impl.JPAQuery;
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.annotation.PostConstruct;
+import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.PersistenceUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -16,6 +22,12 @@ import ru.practicum.category.service.CategoryService;
 import ru.practicum.event.dto.*;
 import ru.practicum.event.enums.StateActionUser;
 import ru.practicum.event.model.*;
+import ru.practicum.event.dto.EventFullDto;
+import ru.practicum.event.dto.EventPublicParam;
+import ru.practicum.event.model.Event;
+import ru.practicum.event.model.EventState;
+import ru.practicum.event.model.MapperEvent;
+import ru.practicum.event.model.QEvent;
 import ru.practicum.event.repository.EventRepository;
 import ru.practicum.event.repository.LocationRepository;
 import ru.practicum.exception.*;
@@ -24,7 +36,10 @@ import ru.practicum.user.model.User;
 import ru.practicum.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Service("eventServiceImpl")
@@ -37,6 +52,69 @@ public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;//  private final
     private final RestTemplate restTemplate = new RestTemplate();
     private final CategoryService categoryService;
+
+    @PersistenceUnit
+    private EntityManagerFactory entityManager;
+
+    private JPAQueryFactory queryFactory;
+
+    @PostConstruct
+    public void initQueryFactory() {
+        queryFactory = new JPAQueryFactory(entityManager.createEntityManager());
+    }
+
+    @Override
+    public EventFullDto getEventById(long eventId) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new EntityNotFoundException("Event with id=" + eventId + " was not found"));
+        Location proxyLocation = event.getLocation();
+        Location location = new Location(proxyLocation.getId(), proxyLocation.getLat(), proxyLocation.getLon());
+        event.setLocation(location);
+        return MapperEvent.toEventFullDto(event);
+    }
+
+    @Override
+    public Collection<EventShortDto> getEventsByFilter(EventPublicParam param) {
+        Collection<Event> events = new ArrayList<>();
+        QEvent event = QEvent.event;
+        BooleanExpression expression = event.state.eq(EventState.PUBLISHED);
+
+        if (Objects.nonNull(param.getRangeStart()) && Objects.nonNull(param.getRangeEnd())) {
+            expression = expression.and(event.eventDate.between(param.getRangeStart(), param.getRangeEnd()));
+        }
+        if (Objects.nonNull(param.getText())) {
+            expression = expression.and(event.description.containsIgnoreCase(param.getText()))
+                    .or(event.annotation.containsIgnoreCase(param.getText()));
+        }
+        if (Objects.nonNull(param.getPaid())) {
+            expression = expression.and(event.paid.eq(param.getPaid()));
+        }
+        if (Objects.nonNull(param.getCategories())) {
+            expression = expression.and(event.category.id.in(param.getCategories()));
+        }
+        if (Objects.nonNull(param.getOnlyAvailable()) && param.getOnlyAvailable()) {
+            expression = expression.and(event.confirmedRequests.lt(event.participantLimit));
+        }
+        JPAQuery<Event> query = queryFactory.selectFrom(event)
+                .where(expression)
+                .offset(param.getFrom())
+                .limit(param.getSize());
+
+        if (Objects.nonNull(param.getSort())) {
+            if (param.getSort().equals("VIEWS")) {
+                events = query.orderBy(event.views.asc()).fetch();
+            }
+            if (param.getSort().equals("EVENT_DATE")) {
+                events = query.orderBy(event.eventDate.asc()).fetch();
+            }
+        } else {
+            events = query.fetch();
+        }
+
+        return events.stream()
+                .map(MapperEvent::toEventShortDto)
+                .toList();
+    }
 
     @Override
     public EventFullDto create(Long userId, NewEventDto newEventDto) {
