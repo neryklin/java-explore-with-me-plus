@@ -1,5 +1,7 @@
 package ru.practicum.event.service;
 
+import ru.practicum.event.dto.EventFullDto;
+import ru.practicum.event.dto.EventPublicParam;
 
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.event.dto.*;
@@ -9,6 +11,11 @@ import java.util.List;
 
 @Transactional(readOnly = true)
 public interface EventService {
+
+    EventFullDto getEventById(long eventId);
+
+    Collection<EventShortDto> getEventsByFilter(EventPublicParam param);
+
 
     @Transactional
     EventFullDto create(Long userId, NewEventDto eventDto);
@@ -24,5 +31,4 @@ public interface EventService {
     List<EventFullDto> search(EventSearchParameters parameters);
 
     EventFullDto update(Long eventId, UpdateEventDto updateEventDto);
-
-}
+    }
