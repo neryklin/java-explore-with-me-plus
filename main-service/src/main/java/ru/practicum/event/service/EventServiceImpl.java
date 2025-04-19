@@ -81,6 +81,8 @@ public class EventServiceImpl implements EventService {
 
         if (Objects.nonNull(param.getRangeStart()) && Objects.nonNull(param.getRangeEnd())) {
             expression = expression.and(event.eventDate.between(param.getRangeStart(), param.getRangeEnd()));
+        } else {
+            expression = expression.and(event.eventDate.after(LocalDateTime.now()));
         }
         if (Objects.nonNull(param.getText())) {
             expression = expression.and(event.description.containsIgnoreCase(param.getText()))
