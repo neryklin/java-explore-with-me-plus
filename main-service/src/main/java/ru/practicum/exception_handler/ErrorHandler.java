@@ -37,7 +37,7 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ApiError validError(final MethodArgumentNotValidException e) {
+    public ApiError validErrorExceptionHandler(final MethodArgumentNotValidException e) {
         log.debug("400 {}", e.getMessage(), e);
         BindingResult bindingResult = e.getBindingResult();
         String field = null;
@@ -57,7 +57,7 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ApiError emailAlreadyExist(final DataIntegrityViolationException e) {
+    public ApiError emailAlreadyExistExceptionHandler(final DataIntegrityViolationException e) {
         log.debug("409 {}", e.getMessage(), e);
         String message = e.getLocalizedMessage();
         return new ApiError(HttpStatus.CONFLICT, "Integrity constraint has been violated.", message, LocalDateTime.now());
