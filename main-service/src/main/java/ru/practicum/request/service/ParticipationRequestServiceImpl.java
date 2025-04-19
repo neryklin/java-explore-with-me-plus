@@ -41,11 +41,11 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
         Event event = getEventOrThrow(eventId);
 
         if (event.getInitiator().getId().equals(userId)) {
-            throw new IllegalStateException("Нельзя подавать заявку на своё событие.");
+            throw new IllegalStateException("Нельзя подавать заявку на своё собственное событие.");
         }
 
         requestRepository.findByEventAndRequester(event, user)
-                .ifPresent(r -> { throw new IllegalStateException("Заявка уже есть."); });
+                .ifPresent(r -> throwDuplicateRequest());
 
         ParticipationRequest request = ParticipationRequest.builder()
                 .requester(user)
@@ -55,6 +55,10 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
                 .build();
 
         return ParticipationRequestMapper.toDto(requestRepository.save(request));
+    }
+
+    private void throwDuplicateRequest() {
+        throw new IllegalStateException("Заявка уже есть.");
     }
 
     @Override
