@@ -60,9 +60,6 @@ public class EventServiceImpl implements EventService {
     public EventFullDto getEventById(long eventId) {
         Event event = eventRepository.findByIdAndState(eventId,EventState.PUBLISHED)
                 .orElseThrow(() -> new EntityNotFoundException("Event with id=" + eventId + " was not found"));
-//        Location proxyLocation = event.getLocation();
-//        Location location = new Location(proxyLocation.getId(), proxyLocation.getLat(), proxyLocation.getLon());
-//        event.setLocation(location);
         return MapperEvent.toEventFullDto(event);
     }
 
@@ -115,6 +112,7 @@ public class EventServiceImpl implements EventService {
     public void changeViews(Long id) {
         Event event = eventRepository.findById(id).get();
         event.setViews(event.getViews() + 1);
+        eventRepository.save(event);
     }
 
     @Override
