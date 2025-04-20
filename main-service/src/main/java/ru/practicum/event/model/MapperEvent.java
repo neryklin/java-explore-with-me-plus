@@ -13,12 +13,17 @@ import ru.practicum.location.model.Location;
 import ru.practicum.user.model.MapperUser;
 import ru.practicum.user.model.User;
 
+import java.time.format.DateTimeFormatter;
+import java.util.Objects;
+
 
 @Component
 public class MapperEvent {
 
 
     public static EventFullDto toEventFullDto(Event event) {
+        String published = Objects.nonNull(event.getPublishedOn()) ?
+                event.getPublishedOn().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) : null;
         return EventFullDto.builder()
                 .id(event.getId())
                 .annotation(event.getAnnotation())
@@ -33,7 +38,7 @@ public class MapperEvent {
                 .description(event.getDescription())
                 .location(event.getLocation())
                 .participantLimit(event.getParticipantLimit())
-                .publishedOn(null)
+                .publishedOn(published)
                 .requestModeration(event.getRequestModeration())
                 .state(event.getState())
                 .build();

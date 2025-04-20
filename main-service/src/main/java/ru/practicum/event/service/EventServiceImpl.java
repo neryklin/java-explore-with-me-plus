@@ -58,7 +58,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventFullDto getEventById(long eventId) {
-        Event event = eventRepository.findById(eventId)
+        Event event = eventRepository.findByIdAndState(eventId,EventState.PUBLISHED)
                 .orElseThrow(() -> new EntityNotFoundException("Event with id=" + eventId + " was not found"));
 //        Location proxyLocation = event.getLocation();
 //        Location location = new Location(proxyLocation.getId(), proxyLocation.getLat(), proxyLocation.getLon());
@@ -112,6 +112,12 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    public void changeViews(Long id) {
+        Event event = eventRepository.findById(id).get();
+        event.setViews(event.getViews() + 1);
+    }
+
+    @Override
     @Transactional
     public EventFullDto create(Long userId, NewEventDto newEventDto) {
         if (newEventDto.getEventDate() != null && !newEventDto.getEventDate().isAfter(LocalDateTime.now().plusHours(2))) {
@@ -133,6 +139,8 @@ public class EventServiceImpl implements EventService {
         if (newEventDto.getRequestModeration() == null) {
             event.setRequestModeration(true);
         }
+        event.setConfirmedRequests(0L);
+        event.setCreatedOn(LocalDateTime.now());
         return MapperEvent.toEventFullDto(eventRepository.save(event));
 
     }
@@ -179,12 +187,6 @@ public class EventServiceImpl implements EventService {
 
         MapperEvent.updateFromDto(event, updateEventUserRequest, category, location);
         return MapperEvent.toEventFullDto(eventRepository.save(event));
-    }
-
-    private void validateForPrivate(EventState eventState, StateActionUser stateActionUser) {
-        if (eventState.equals(EventState.PUBLISHED)) {
-            throw new ConflictException("Can't change event not cancelled or in moderation");
-        }
     }
 
     @Override
@@ -295,4 +297,9 @@ public class EventServiceImpl implements EventService {
         return MapperEvent.toEventFullDto(eventRepository.save(event));
     }
 
+    private void validateForPrivate(EventState eventState, StateActionUser stateActionUser) {
+        if (eventState.equals(EventState.PUBLISHED)) {
+            throw new ConflictException("Can't change event not cancelled or in moderation");
+        }
+    }
 }

@@ -25,4 +25,6 @@ public interface StatsRepository extends JpaRepository<Hit, Long> {
             "GROUP BY h.app, h.uri " +
             "ORDER BY hits DESC")
     List<Object[]> findUniqueHit(LocalDateTime start, LocalDateTime end, List<String> uris);
+
+    boolean existsByIpAndUri(String ip, String uri);
 }

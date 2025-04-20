@@ -37,4 +37,9 @@ public class StatsController {
         log.info("POST Создаем hit {}", createHitDto);
         return statsService.create(createHitDto);
     }
+
+    @GetMapping(path = "/stats/check")
+    public boolean checkIp(@RequestParam String ip, @RequestParam String uri){
+        return statsService.checkIp(ip, uri);
+    }
 }

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriBuilder;
+import reactor.core.publisher.Mono;
 import ru.practicum.stats_dto.CreateHitDto;
 import ru.practicum.stats_dto.CreateStatsDto;
 import ru.practicum.stats_dto.ResponseStatsDto;
@@ -51,5 +52,15 @@ public class StatsClientImpl implements StatsClient {
                 .bodyToFlux(ResponseStatsDto.class)
                 .collectList()
                 .block();
+    }
+
+    public Mono<Boolean> checkIp(String ip, String uri) {
+        return webClient.get().uri(uriBuilder -> uriBuilder
+                        .path("/stats/check")
+                        .queryParam("ip", ip)
+                        .queryParam("uri", uri)
+                        .build()
+                ).retrieve()
+                .bodyToMono(Boolean.class);
     }
 }

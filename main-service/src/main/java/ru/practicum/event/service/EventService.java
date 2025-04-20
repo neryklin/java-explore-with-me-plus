@@ -13,6 +13,7 @@ public interface EventService {
 
     Collection<EventShortDto> getEventsByFilter(EventPublicParam param);
 
+    void changeViews(Long id);
 
     @Transactional
     EventFullDto create(Long userId, NewEventDto eventDto);

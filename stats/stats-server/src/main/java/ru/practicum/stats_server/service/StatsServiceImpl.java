@@ -55,4 +55,8 @@ public class StatsServiceImpl implements StatsService {
             ).toList();
         }
     }
+
+    public boolean checkIp(String ip, String uri){
+        return statsRepository.existsByIpAndUri(ip,uri);
+    }
 }

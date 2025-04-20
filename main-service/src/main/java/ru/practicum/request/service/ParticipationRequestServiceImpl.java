@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.event.model.Event;
+import ru.practicum.event.model.EventState;
 import ru.practicum.event.repository.EventRepository;
 import ru.practicum.exception_handler.NotFoundException;
 import ru.practicum.request.dto.ParticipationRequestDto;
@@ -36,12 +37,15 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
     }
 
     @Override
+    @Transactional
     public ParticipationRequestDto createRequest(Long userId, Long eventId) {
         User user = getUserOrThrow(userId);
         Event event = getEventOrThrow(eventId);
-
         if (event.getInitiator().getId().equals(userId)) {
             throw new IllegalStateException("Нельзя подавать заявку на своё собственное событие.");
+        }
+        if (!event.getState().equals(EventState.PUBLISHED)){
+            throw new IllegalStateException("Нельзя подавать заявку на неопубликованное событие.");
         }
 
         requestRepository.findByEventAndRequester(event, user)
@@ -57,10 +61,6 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
         return ParticipationRequestMapper.toDto(requestRepository.save(request));
     }
 
-    private void throwDuplicateRequest() {
-        throw new IllegalStateException("Заявка уже есть.");
-    }
-
     @Override
     public ParticipationRequestDto cancelRequest(Long userId, Long requestId) {
         ParticipationRequest request = requestRepository.findById(requestId)
@@ -72,6 +72,10 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
 
         request.setStatus(RequestStatus.CANCELED);
         return ParticipationRequestMapper.toDto(request);
+    }
+
+    private void throwDuplicateRequest() {
+        throw new IllegalStateException("Заявка уже есть.");
     }
 
     private User getUserOrThrow(Long userId) {

@@ -1,6 +1,7 @@
 package ru.practicum.event.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.constraints.Future;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -13,10 +14,14 @@ import ru.practicum.event.dto.EventShortDto;
 import ru.practicum.event.service.EventService;
 import ru.practicum.stats_client.StatsClient;
 import ru.practicum.stats_dto.CreateHitDto;
+import ru.practicum.stats_dto.CreateStatsDto;
+import ru.practicum.stats_dto.ResponseStatsDto;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 @RestController
 @Slf4j
@@ -30,17 +35,17 @@ public class EventPublicController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public Collection<EventShortDto> findEvents(@RequestParam String text,
-                                                @RequestParam Collection<Long> categories,
-                                                @RequestParam boolean paid,
+    public Collection<EventShortDto> findEvents(@RequestParam(required = false) String text,
+                                                @RequestParam(required = false) Collection<Long> categories,
+                                                @RequestParam(required = false) Boolean paid,
                                                 @RequestParam(required = false)
                                                 @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeStart,
                                                 @RequestParam(required = false)
-                                                @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
-                                                @RequestParam(defaultValue = "false") boolean onlyAvailable,
-                                                @RequestParam String sort,
-                                                @RequestParam(defaultValue = "0") long from,
-                                                @RequestParam(defaultValue = "10") long size,
+                                                @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") @Future LocalDateTime rangeEnd,
+                                                @RequestParam(defaultValue = "false") Boolean onlyAvailable,
+                                                @RequestParam(required = false) String sort,
+                                                @RequestParam(defaultValue = "0") Long from,
+                                                @RequestParam(defaultValue = "10") Long size,
                                                 HttpServletRequest request) {
 
         EventPublicParam param = new EventPublicParam(text, categories, paid,
@@ -52,6 +57,7 @@ public class EventPublicController {
                 .uri(request.getRequestURI())
                 .timestamp(LocalDateTime.now().format(formatter))
                 .build();
+
         statsClient.sendHit(hitDto);
         return eventService.getEventsByFilter(param);
     }
@@ -66,6 +72,11 @@ public class EventPublicController {
                 .uri(request.getRequestURI())
                 .timestamp(LocalDateTime.now().format(formatter))
                 .build();
+        boolean checkIp = Boolean.TRUE.equals(statsClient.checkIp(request.getRemoteAddr(), request.getRequestURI()).block());
+        if (!checkIp){
+            eventService.changeViews(eventId);
+        }
+
         statsClient.sendHit(hitDto);
         return eventService.getEventById(eventId);
     }
