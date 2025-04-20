@@ -1,7 +1,6 @@
 package ru.practicum.event.service;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
-
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.annotation.PostConstruct;
@@ -22,15 +21,9 @@ import ru.practicum.category.service.CategoryService;
 import ru.practicum.event.dto.*;
 import ru.practicum.event.enums.StateActionUser;
 import ru.practicum.event.model.*;
-import ru.practicum.event.dto.EventFullDto;
-import ru.practicum.event.dto.EventPublicParam;
-import ru.practicum.event.model.Event;
-import ru.practicum.event.model.EventState;
-import ru.practicum.event.model.MapperEvent;
-import ru.practicum.event.model.QEvent;
 import ru.practicum.event.repository.EventRepository;
 import ru.practicum.event.repository.LocationRepository;
-import ru.practicum.exception.*;
+import ru.practicum.exception_handler.*;
 import ru.practicum.location.model.Location;
 import ru.practicum.user.model.User;
 import ru.practicum.user.repository.UserRepository;
@@ -67,9 +60,9 @@ public class EventServiceImpl implements EventService {
     public EventFullDto getEventById(long eventId) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new EntityNotFoundException("Event with id=" + eventId + " was not found"));
-        Location proxyLocation = event.getLocation();
-        Location location = new Location(proxyLocation.getId(), proxyLocation.getLat(), proxyLocation.getLon());
-        event.setLocation(location);
+//        Location proxyLocation = event.getLocation();
+//        Location location = new Location(proxyLocation.getId(), proxyLocation.getLat(), proxyLocation.getLon());
+//        event.setLocation(location);
         return MapperEvent.toEventFullDto(event);
     }
 
@@ -119,6 +112,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    @Transactional
     public EventFullDto create(Long userId, NewEventDto newEventDto) {
         if (newEventDto.getEventDate() != null && !newEventDto.getEventDate().isAfter(LocalDateTime.now().plusHours(2))) {
             throw new EventDateValidationException("Event date 2+ hours after now");
@@ -159,16 +153,25 @@ public class EventServiceImpl implements EventService {
 
 
     @Override
+    @Transactional
     public EventFullDto updateEvent(Long userId, Integer eventId, UpdateEventUserRequest updateEventUserRequest) {
         Event event = eventRepository.findByIdAndInitiatorId(eventId, userId)
                 .orElseThrow(() -> new NotFoundException("Event not found " + eventId));
 
         validateForPrivate(event.getState(), updateEventUserRequest.getStateAction());
-
-        Category category = categoryRepository.findById(updateEventUserRequest.getCategory())
-                .orElseThrow(() -> new NotFoundException("Event not found " + eventId));
-
-        Location location = locationRepository.save(updateEventUserRequest.getLocation());
+        Category category;
+        if (updateEventUserRequest.getCategory() != null) {
+            category = categoryRepository.findById(updateEventUserRequest.getCategory())
+                    .orElseThrow(() -> new NotFoundException("Event not found " + eventId));
+        } else {
+            category = null;
+        }
+        Location location;
+        if (updateEventUserRequest.getLocation() != null) {
+            location = locationRepository.save(updateEventUserRequest.getLocation());
+        } else {
+            location = null;
+        }
 
         if (updateEventUserRequest.getEventDate() != null && !updateEventUserRequest.getEventDate().isAfter(LocalDateTime.now().plusHours(2))) {
             throw new EventDateValidationException("Event date 2+ hours after now");
@@ -223,54 +226,55 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventFullDto update(Long eventId, UpdateEventDto updateEventDto) {
+    @Transactional
+    public EventFullDto update(Long eventId, UpdateEventAdminRequest updateEventAdminRequest) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new EntityNotFoundException("События с id = " + eventId + " не найдено"));
 
-        if (updateEventDto.getAnnotation() != null) {
-            event.setAnnotation(updateEventDto.getAnnotation());
+        if (event.getEventDate().isBefore(LocalDateTime.now().plusHours(1))) {
+            throw new InvalidDateException("Дата начала изменяемого события должна быть не ранее чем за час от даты публикации");
         }
 
-        if (updateEventDto.getCategory() != null) {
-            Category category = categoryService.findCategoryById(updateEventDto.getCategory());
+        if (updateEventAdminRequest.getAnnotation() != null) {
+            event.setAnnotation(updateEventAdminRequest.getAnnotation());
+        }
+
+        if (updateEventAdminRequest.getCategory() != null) {
+            Category category = categoryService.findCategoryById(updateEventAdminRequest.getCategory());
             event.setCategory(category);
         }
 
-        if (updateEventDto.getDescription() != null) {
-            event.setDescription(updateEventDto.getDescription());
+        if (updateEventAdminRequest.getDescription() != null) {
+            event.setDescription(updateEventAdminRequest.getDescription());
         }
 
-        if (updateEventDto.getEventDate() != null) {
-            event.setEventDate(updateEventDto.getEventDate());
+        if (updateEventAdminRequest.getEventDate() != null) {
+            event.setEventDate(updateEventAdminRequest.getEventDate());
         }
 
-        if (updateEventDto.getLocation() != null) {
-            event.setLocation(updateEventDto.getLocation());
+        if (updateEventAdminRequest.getLocation() != null) {
+            event.setLocation(updateEventAdminRequest.getLocation());
         }
 
-        if (updateEventDto.getPaid() != null) {
-            event.setPaid(updateEventDto.getPaid());
+        if (updateEventAdminRequest.getPaid() != null) {
+            event.setPaid(updateEventAdminRequest.getPaid());
         }
 
-        if (updateEventDto.getParticipantLimit() != null) {
-            event.setParticipantLimit(updateEventDto.getParticipantLimit());
+        if (updateEventAdminRequest.getParticipantLimit() != null) {
+            event.setParticipantLimit(updateEventAdminRequest.getParticipantLimit());
         }
 
-        if (updateEventDto.getRequestModeration() != null) {
-            event.setRequestModeration(updateEventDto.getRequestModeration());
+        if (updateEventAdminRequest.getRequestModeration() != null) {
+            event.setRequestModeration(updateEventAdminRequest.getRequestModeration());
         }
 
-        if (updateEventDto.getStateAction() != null) {
-            StateAction stateAction = StateAction.valueOf(updateEventDto.getStateAction());
+        if (updateEventAdminRequest.getStateAction() != null) {
+            StateAction stateAction = updateEventAdminRequest.getStateAction();
+
             if (stateAction == StateAction.PUBLISH_EVENT) {
                 if (event.getState() != EventState.PENDING) {
                     throw new InvalidStateException("Событие можно публиковать, только если оно в состоянии ожидания публикации");
                 }
-
-                if (event.getEventDate().isBefore(LocalDateTime.now().plusHours(1))) {
-                    throw new InvalidDateException("Дата начала изменяемого события должна быть не ранее чем за час от даты публикации");
-                }
-
                 event.setState(EventState.PUBLISHED);
                 event.setPublishedOn(LocalDateTime.now());
             }
@@ -284,8 +288,8 @@ public class EventServiceImpl implements EventService {
             }
         }
 
-        if (updateEventDto.getTitle() != null) {
-            event.setTitle(updateEventDto.getTitle());
+        if (updateEventAdminRequest.getTitle() != null) {
+            event.setTitle(updateEventAdminRequest.getTitle());
         }
 
         return MapperEvent.toEventFullDto(eventRepository.save(event));

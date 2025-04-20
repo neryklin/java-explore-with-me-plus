@@ -1,9 +1,6 @@
 package ru.practicum.user.dto;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -18,6 +15,7 @@ public class RequestUserCreate {
     @Pattern(regexp = ".+@.+\\..{2,63}")
     private String email;
     @NotNull
+    @NotBlank
     @Size(min = 2, max = 250)
     private String name;
 }

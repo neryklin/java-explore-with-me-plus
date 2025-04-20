@@ -35,7 +35,7 @@ public class CompilationsAdminController {
 
     @PatchMapping(path = "{compId}")
     @ResponseStatus(HttpStatus.OK)
-    public CompilationsDto path(@PathVariable long compId, @RequestBody RequestCompilationUpdate update) {
+    public CompilationsDto path(@PathVariable long compId, @Valid @RequestBody RequestCompilationUpdate update) {
         log.info("PATCH Обновление подборки событий {}", update);
         return service.update(compId, update);
     }

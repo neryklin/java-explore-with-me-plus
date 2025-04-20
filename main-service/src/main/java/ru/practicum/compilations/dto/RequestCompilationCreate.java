@@ -1,6 +1,7 @@
 package ru.practicum.compilations.dto;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,8 +16,8 @@ import java.util.Collection;
 @ToString
 public class RequestCompilationCreate {
     Collection<Long> events;
-    @NotNull
     Boolean pinned;
-    @NotNull
+    @NotBlank
+    @Size(min = 1, max = 50)
     String title;
 }

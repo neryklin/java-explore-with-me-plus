@@ -7,6 +7,7 @@ import ru.practicum.category.dto.CategoryDto;
 import ru.practicum.category.model.Category;
 import ru.practicum.category.model.MapperCategory;
 import ru.practicum.category.repository.CategoryRepository;
+import ru.practicum.event.repository.EventRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,6 +17,7 @@ import java.util.stream.Collectors;
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final EventRepository eventRepository;
 
     @Override
     public List<CategoryDto> findAll() {
@@ -50,6 +52,10 @@ public class CategoryServiceImpl implements CategoryService {
         if (!categoryRepository.existsById(id)) {
             throw new EntityNotFoundException("Категория с id " + id + " не найдена");
         }
+
+//        if (eventRepository.findBy(category).isPresent()) {
+//            throw new InvalidParameterException("Category is related to event");
+//        }
         categoryRepository.deleteById(id);
     }
 

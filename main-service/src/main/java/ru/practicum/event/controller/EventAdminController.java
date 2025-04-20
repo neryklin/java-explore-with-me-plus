@@ -1,5 +1,6 @@
 package ru.practicum.event.controller;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
@@ -9,7 +10,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventSearchParameters;
-import ru.practicum.event.dto.UpdateEventDto;
+import ru.practicum.event.dto.UpdateEventAdminRequest;
 import ru.practicum.event.model.EventState;
 import ru.practicum.event.service.EventService;
 
@@ -52,9 +53,9 @@ public class EventAdminController {
 
     @PatchMapping("/{eventId}")
     public EventFullDto update(@PathVariable long eventId,
-                               @RequestBody UpdateEventDto updateEventDto) {
-        log.info("Запрос на изменения события {} с параметрами {}", eventId, updateEventDto);
-        return eventService.update(eventId, updateEventDto);
+                               @Valid @RequestBody UpdateEventAdminRequest updateEventAdminRequest) {
+        log.info("Запрос на изменения события {} с параметрами {}", eventId, updateEventAdminRequest);
+        return eventService.update(eventId, updateEventAdminRequest);
     }
 
 }

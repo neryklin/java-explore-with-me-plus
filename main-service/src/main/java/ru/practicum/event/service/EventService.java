@@ -1,8 +1,5 @@
 package ru.practicum.event.service;
 
-import ru.practicum.event.dto.EventFullDto;
-import ru.practicum.event.dto.EventPublicParam;
-
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.event.dto.*;
 
@@ -30,5 +27,5 @@ public interface EventService {
 
     List<EventFullDto> search(EventSearchParameters parameters);
 
-    EventFullDto update(Long eventId, UpdateEventDto updateEventDto);
-    }
+    EventFullDto update(Long eventId, UpdateEventAdminRequest updateEventAdminRequest);
+}

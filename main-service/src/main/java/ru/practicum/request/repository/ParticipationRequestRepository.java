@@ -1,9 +1,9 @@
 package ru.practicum.request.repository;
 
+import org.springframework.data.jpa.repository.JpaRepository;
+import ru.practicum.event.model.Event;
 import ru.practicum.request.model.ParticipationRequest;
 import ru.practicum.user.model.User;
-import ru.practicum.event.model.Event;
-import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 import java.util.Optional;

@@ -1,7 +1,7 @@
 package ru.practicum.request.model;
 
-import lombok.*;
 import jakarta.persistence.*;
+import lombok.*;
 import ru.practicum.event.model.Event;
 import ru.practicum.request.enums.RequestStatus;
 import ru.practicum.user.model.User;

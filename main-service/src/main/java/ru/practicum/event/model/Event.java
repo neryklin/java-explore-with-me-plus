@@ -29,6 +29,7 @@ public class Event {
     String annotation;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    // @ManyToOne
     @JoinColumn(name = "initiator_id")
     User initiator;
 
@@ -42,7 +43,8 @@ public class Event {
     @JoinColumn(name = "category_id")
     Category category;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    //@ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(cascade = {CascadeType.ALL})
     @JoinColumn(name = "location_id")
     Location location;
 

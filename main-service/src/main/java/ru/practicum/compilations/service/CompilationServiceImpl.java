@@ -20,8 +20,10 @@ import ru.practicum.compilations.model.QCompilation;
 import ru.practicum.compilations.repository.CompilationRepository;
 import ru.practicum.event.repository.EventRepository;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -44,8 +46,12 @@ public class CompilationServiceImpl implements CompilationService {
     public CompilationsDto create(RequestCompilationCreate create) {
         Compilation compilation = new Compilation();
         compilation.setTitle(create.getTitle());
-        compilation.setPinned(create.getPinned());
-        compilation.setEvents(eventRepository.findAllById(create.getEvents()));
+        compilation.setPinned(Optional.ofNullable(create.getPinned()).orElse(false));
+        if (create.getEvents() != null) {
+            compilation.setEvents(eventRepository.findAllById(create.getEvents()));
+        } else {
+            compilation.setEvents(new ArrayList<>());
+        }
         return MapperCompilation.toDto(compilationRepository.save(compilation));
     }
 

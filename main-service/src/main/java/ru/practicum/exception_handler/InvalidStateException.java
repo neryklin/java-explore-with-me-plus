@@ -1,4 +1,4 @@
-package ru.practicum.exception;
+package ru.practicum.exception_handler;
 
 public class InvalidStateException extends RuntimeException {
     public InvalidStateException(String message) {
