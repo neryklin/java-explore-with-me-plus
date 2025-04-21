@@ -14,14 +14,10 @@ import ru.practicum.event.dto.EventShortDto;
 import ru.practicum.event.service.EventService;
 import ru.practicum.stats_client.StatsClient;
 import ru.practicum.stats_dto.CreateHitDto;
-import ru.practicum.stats_dto.CreateStatsDto;
-import ru.practicum.stats_dto.ResponseStatsDto;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 @RestController
 @Slf4j

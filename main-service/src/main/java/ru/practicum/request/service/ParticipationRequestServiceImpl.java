@@ -44,7 +44,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
         if (event.getInitiator().getId().equals(userId)) {
             throw new IllegalStateException("Нельзя подавать заявку на своё собственное событие.");
         }
-        if (!event.getState().equals(EventState.PUBLISHED)){
+        if (!event.getState().equals(EventState.PUBLISHED)) {
             throw new IllegalStateException("Нельзя подавать заявку на неопубликованное событие.");
         }
 

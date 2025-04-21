@@ -25,9 +25,15 @@ import ru.practicum.event.repository.EventRepository;
 import ru.practicum.event.repository.LocationRepository;
 import ru.practicum.exception_handler.*;
 import ru.practicum.location.model.Location;
+import ru.practicum.request.dto.ParticipationRequestDto;
+import ru.practicum.request.enums.RequestStatus;
+import ru.practicum.request.mapper.ParticipationRequestMapper;
+import ru.practicum.request.model.ParticipationRequest;
+import ru.practicum.request.repository.ParticipationRequestRepository;
 import ru.practicum.user.model.User;
 import ru.practicum.user.repository.UserRepository;
 
+import java.security.InvalidParameterException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -45,6 +51,7 @@ public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;//  private final
     private final RestTemplate restTemplate = new RestTemplate();
     private final CategoryService categoryService;
+    private final ParticipationRequestRepository participationRequestRepository;
 
     @PersistenceUnit
     private EntityManagerFactory entityManager;
@@ -58,7 +65,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventFullDto getEventById(long eventId) {
-        Event event = eventRepository.findByIdAndState(eventId,EventState.PUBLISHED)
+        Event event = eventRepository.findByIdAndState(eventId, EventState.PUBLISHED)
                 .orElseThrow(() -> new EntityNotFoundException("Event with id=" + eventId + " was not found"));
         return MapperEvent.toEventFullDto(event);
     }
@@ -293,6 +300,60 @@ public class EventServiceImpl implements EventService {
         }
 
         return MapperEvent.toEventFullDto(eventRepository.save(event));
+    }
+
+    @Override
+    public List<ParticipationRequestDto> findRequestsByEventId(long userId, long eventId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User with was not found " + userId));
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new EntityNotFoundException("События с id = " + eventId + " не найдено"));
+
+
+        return participationRequestRepository.findAllByEvent(event).stream()
+                .map(ParticipationRequestMapper::toDto)
+                .toList();
+    }
+
+    @Override
+    public EventRequestStatusUpdateResult updateRequestsStatus(long userId, long eventId, EventRequestStatusUpdateRequest eventRequestStatusUpdateRequest) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User is not found with id = " + userId));
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("event is not found with id = " + eventId));
+        if (!event.getInitiator().equals(user))
+            throw new ForbiddenException("User with id = " + userId + " is not a initiator of event with id = " + eventId);
+
+        //если для события лимит заявок равен 0 или отключена пре-модерация заявок, то подтверждение заявок не требуется
+        EventRequestStatusUpdateResult result = new EventRequestStatusUpdateResult();
+        if (!event.getRequestModeration() || event.getParticipantLimit() == 0) {
+            return result;
+        }
+
+        Collection<ParticipationRequest> requests = participationRequestRepository
+                .findByEventIdAndRequesterIdIn(eventId, eventRequestStatusUpdateRequest.getRequestIds()).stream().toList();
+
+        if (event.getConfirmedRequests() + requests.size() > event.getParticipantLimit() && eventRequestStatusUpdateRequest.getStatus().equals(RequestStatus.CONFIRMED)) {
+            throw new InvalidParameterException("exceeding the limit of participants");
+        }
+
+        for (ParticipationRequest oneRequest : requests) {
+            oneRequest.setStatus(RequestStatus.valueOf(eventRequestStatusUpdateRequest.getStatus().toString()));
+        }
+        participationRequestRepository.saveAll(requests);
+        if (eventRequestStatusUpdateRequest.getStatus().equals(RequestStatus.CONFIRMED)) {
+            event.setConfirmedRequests(event.getConfirmedRequests() + requests.size());
+        }
+        eventRepository.save(event);
+        if (eventRequestStatusUpdateRequest.getStatus().equals(RequestStatus.CONFIRMED)) {
+            result.setConfirmedRequests(requests.stream().map(request -> ParticipationRequestMapper.toDto(request)).toList());
+        }
+
+        if (eventRequestStatusUpdateRequest.getStatus().equals(RequestStatus.REJECTED)) {
+            result.setRejectedRequests(requests.stream().map(request -> ParticipationRequestMapper.toDto(request)).toList());
+        }
+
+        return result;
     }
 
     private void validateForPrivate(EventState eventState, StateActionUser stateActionUser) {

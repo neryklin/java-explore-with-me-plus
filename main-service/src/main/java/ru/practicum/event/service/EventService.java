@@ -2,6 +2,7 @@ package ru.practicum.event.service;
 
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.event.dto.*;
+import ru.practicum.request.dto.ParticipationRequestDto;
 
 import java.util.Collection;
 import java.util.List;
@@ -29,4 +30,11 @@ public interface EventService {
     List<EventFullDto> search(EventSearchParameters parameters);
 
     EventFullDto update(Long eventId, UpdateEventAdminRequest updateEventAdminRequest);
+
+    List<ParticipationRequestDto> findRequestsByEventId(long userId, long eventId);
+
+    EventRequestStatusUpdateResult updateRequestsStatus(long userId,
+                                                        long eventId,
+                                                        EventRequestStatusUpdateRequest request);
+
 }
