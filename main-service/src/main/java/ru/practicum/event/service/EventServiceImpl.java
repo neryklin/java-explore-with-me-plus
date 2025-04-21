@@ -33,7 +33,6 @@ import ru.practicum.request.repository.ParticipationRequestRepository;
 import ru.practicum.user.model.User;
 import ru.practicum.user.repository.UserRepository;
 
-import java.security.InvalidParameterException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -316,6 +315,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    @Transactional
     public EventRequestStatusUpdateResult updateRequestsStatus(long userId, long eventId, EventRequestStatusUpdateRequest eventRequestStatusUpdateRequest) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User is not found with id = " + userId));
@@ -330,13 +330,20 @@ public class EventServiceImpl implements EventService {
             return result;
         }
 
-        Collection<ParticipationRequest> requests = participationRequestRepository
-                .findByEventIdAndRequesterIdIn(eventId, eventRequestStatusUpdateRequest.getRequestIds()).stream().toList();
 
-        if (event.getConfirmedRequests() + requests.size() > event.getParticipantLimit() && eventRequestStatusUpdateRequest.getStatus().equals(RequestStatus.CONFIRMED)) {
-            throw new InvalidParameterException("exceeding the limit of participants");
+        Collection<ParticipationRequest> requests = participationRequestRepository
+                .findByEventIdAndIdIn(eventId, eventRequestStatusUpdateRequest.getRequestIds()).stream().toList();
+
+
+        if (event.getConfirmedRequests() + requests.size() > event.getParticipantLimit()
+                && eventRequestStatusUpdateRequest.getStatus().equals(RequestStatus.CONFIRMED)) {
+            throw new ConflictException("exceeding the limit of participants");
         }
 
+        if (requests.stream().anyMatch(request -> request.getStatus().equals(RequestStatus.CONFIRMED)
+                && eventRequestStatusUpdateRequest.getStatus().equals(RequestStatus.REJECTED))) {
+            throw new ConflictException("request already confirmed");
+        }
         for (ParticipationRequest oneRequest : requests) {
             oneRequest.setStatus(RequestStatus.valueOf(eventRequestStatusUpdateRequest.getStatus().toString()));
         }
@@ -346,19 +353,35 @@ public class EventServiceImpl implements EventService {
         }
         eventRepository.save(event);
         if (eventRequestStatusUpdateRequest.getStatus().equals(RequestStatus.CONFIRMED)) {
-            result.setConfirmedRequests(requests.stream().map(request -> ParticipationRequestMapper.toDto(request)).toList());
+            result.setConfirmedRequests(requests.stream()
+                    .map(ParticipationRequestMapper::toDto).toList());
         }
 
         if (eventRequestStatusUpdateRequest.getStatus().equals(RequestStatus.REJECTED)) {
-            result.setRejectedRequests(requests.stream().map(request -> ParticipationRequestMapper.toDto(request)).toList());
+            result.setRejectedRequests(requests.stream()
+                    .map(ParticipationRequestMapper::toDto).toList());
         }
 
         return result;
     }
 
+
     private void validateForPrivate(EventState eventState, StateActionUser stateActionUser) {
         if (eventState.equals(EventState.PUBLISHED)) {
             throw new ConflictException("Can't change event not cancelled or in moderation");
         }
+    }
+
+
+    @Override
+    public Collection<ParticipationRequestDto> findAllRequestsByEventId(long userId, long eventId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User is not found with id = " + userId));
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("event is not found with id = " + eventId));
+        Collection<ParticipationRequestDto> result = new ArrayList<>();
+        result = participationRequestRepository.findAllByEvent(event).stream()
+                .map(ParticipationRequestMapper::toDto).toList();
+        return result;
     }
 }

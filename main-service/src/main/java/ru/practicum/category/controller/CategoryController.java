@@ -17,8 +17,9 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @GetMapping
-    public List<CategoryDto> getAllCategories() {
-        return categoryService.findAll();
+    public List<CategoryDto> getAllCategories(@RequestParam(defaultValue = "0") Integer from,
+                                              @RequestParam(defaultValue = "10") Integer size) {
+        return categoryService.findAll(from, size);
     }
 
     @GetMapping("/{id}")

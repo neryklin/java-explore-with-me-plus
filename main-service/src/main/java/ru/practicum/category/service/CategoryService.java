@@ -6,7 +6,7 @@ import ru.practicum.category.model.Category;
 import java.util.List;
 
 public interface CategoryService {
-    List<CategoryDto> findAll();
+    List<CategoryDto> findAll(Integer from, Integer size);
 
     CategoryDto findById(Long id);
 

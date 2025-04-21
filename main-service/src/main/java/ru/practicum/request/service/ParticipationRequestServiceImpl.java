@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.model.EventState;
 import ru.practicum.event.repository.EventRepository;
+import ru.practicum.exception_handler.ConflictException;
 import ru.practicum.exception_handler.NotFoundException;
 import ru.practicum.request.dto.ParticipationRequestDto;
 import ru.practicum.request.enums.RequestStatus;
@@ -41,6 +42,11 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
     public ParticipationRequestDto createRequest(Long userId, Long eventId) {
         User user = getUserOrThrow(userId);
         Event event = getEventOrThrow(eventId);
+
+        if (!requestRepository.findByEventIdAndRequesterId(eventId, userId).isEmpty()) {
+            throw new ConflictException("Request already exists");
+        }
+
         if (event.getInitiator().getId().equals(userId)) {
             throw new IllegalStateException("Нельзя подавать заявку на своё собственное событие.");
         }
@@ -48,8 +54,12 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
             throw new IllegalStateException("Нельзя подавать заявку на неопубликованное событие.");
         }
 
-        requestRepository.findByEventAndRequester(event, user)
-                .ifPresent(r -> throwDuplicateRequest());
+
+        List<ParticipationRequest> requests = requestRepository.findAllByEvent(event);
+
+        if (!event.getRequestModeration() && requests.size() >= event.getParticipantLimit()) {
+            throw new ConflictException("Member limit exceeded ");
+        }
 
         ParticipationRequest request = ParticipationRequest.builder()
                 .requester(user)
@@ -57,8 +67,11 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
                 .status(RequestStatus.PENDING)
                 .created(LocalDateTime.now())
                 .build();
-
-        return ParticipationRequestMapper.toDto(requestRepository.save(request));
+        if (event.getParticipantLimit() == 0) {
+            request.setStatus(RequestStatus.CONFIRMED);
+        }
+        ParticipationRequestDto rez = ParticipationRequestMapper.toDto(requestRepository.save(request));
+        return rez;
     }
 
     @Override

@@ -2,6 +2,8 @@ package ru.practicum.category.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.category.dto.CategoryDto;
 import ru.practicum.category.model.Category;
@@ -20,8 +22,9 @@ public class CategoryServiceImpl implements CategoryService {
     private final EventRepository eventRepository;
 
     @Override
-    public List<CategoryDto> findAll() {
-        return categoryRepository.findAll().stream()
+    public List<CategoryDto> findAll(Integer from, Integer size) {
+        Pageable page = PageRequest.of(from, size);
+        return categoryRepository.findAll(page).stream()
                 .map(MapperCategory::toCategoryDto)
                 .collect(Collectors.toList());
     }
@@ -52,10 +55,6 @@ public class CategoryServiceImpl implements CategoryService {
         if (!categoryRepository.existsById(id)) {
             throw new EntityNotFoundException("Категория с id " + id + " не найдена");
         }
-
-//        if (eventRepository.findBy(category).isPresent()) {
-//            throw new InvalidParameterException("Category is related to event");
-//        }
         categoryRepository.deleteById(id);
     }
 

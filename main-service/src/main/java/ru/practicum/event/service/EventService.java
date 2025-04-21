@@ -37,4 +37,6 @@ public interface EventService {
                                                         long eventId,
                                                         EventRequestStatusUpdateRequest request);
 
+
+    Collection<ParticipationRequestDto> findAllRequestsByEventId(long userId, long eventId);
 }

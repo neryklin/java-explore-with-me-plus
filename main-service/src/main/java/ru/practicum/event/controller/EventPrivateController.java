@@ -5,11 +5,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.event.dto.EventFullDto;
-import ru.practicum.event.dto.EventShortDto;
-import ru.practicum.event.dto.NewEventDto;
-import ru.practicum.event.dto.UpdateEventUserRequest;
+import ru.practicum.event.dto.*;
 import ru.practicum.event.service.EventService;
+import ru.practicum.request.dto.ParticipationRequestDto;
 
 import java.util.Collection;
 
@@ -52,4 +50,21 @@ public class EventPrivateController {
         log.info("Updating event id {} by user id {} - Start", eventId, userId);
         return eventService.updateEvent(userId, eventId, updateEventUserRequest);
     }
+
+    @PatchMapping("/{eventId}/requests")
+    public EventRequestStatusUpdateResult updateRequests(@PathVariable Integer userId,
+                                                         @PathVariable Integer eventId,
+                                                         @RequestBody EventRequestStatusUpdateRequest eventRequestStatusUpdateRequest) {
+        log.info("Updating requests for event with id {} by user with id {} - Started", eventId, userId);
+        return eventService.updateRequestsStatus(userId, eventId, eventRequestStatusUpdateRequest);
+    }
+
+
+    @GetMapping("/{eventId}/requests")
+    public Collection<ParticipationRequestDto> getRequestsByOwnerOfEvent(@PathVariable Integer userId,
+                                                                         @PathVariable Integer eventId) {
+        log.info("Getting requests for event with id {} by user with id {} - Started", eventId, userId);
+        return eventService.findAllRequestsByEventId(userId, eventId);
+    }
+
 }
