@@ -20,7 +20,7 @@ public class MapperHit {
                 .app(createHitDto.getApp())
                 .uri(createHitDto.getUri())
                 .ip(createHitDto.getIp())
-                .timestamp(LocalDateTime.parse(createHitDto.getTimestamp(),formatter))
+                .timestamp(LocalDateTime.parse(createHitDto.getTimestamp(), formatter))
                 .build();
     }
 

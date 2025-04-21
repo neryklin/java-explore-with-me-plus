@@ -13,7 +13,8 @@ import ru.practicum.stats_server.repository.StatsRepository;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -34,11 +35,11 @@ public class StatsServiceImpl implements StatsService {
     public Collection<ResponseStatsDto> getStats(String start, String end, List<String> uris, Boolean unique) {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        LocalDateTime startTime = LocalDateTime.parse(start,formatter);
-        LocalDateTime endTime = LocalDateTime.parse(end,formatter);
+        LocalDateTime startTime = LocalDateTime.parse(start, formatter);
+        LocalDateTime endTime = LocalDateTime.parse(end, formatter);
         if (unique) {
 
-            Collection<Object[]> response = statsRepository.findUniqueHit(startTime,endTime, uris);
+            Collection<Object[]> response = statsRepository.findUniqueHit(startTime, endTime, uris);
             return response.stream().map(hit ->
                     ResponseStatsDto.builder()
                             .app(hit[0].toString())
@@ -46,7 +47,7 @@ public class StatsServiceImpl implements StatsService {
                             .hits((Long) hit[2]).build()
             ).toList();
         } else {
-            Collection<Object[]> response = statsRepository.findAllHit(startTime,endTime, uris);
+            Collection<Object[]> response = statsRepository.findAllHit(startTime, endTime, uris);
             return response.stream().map(hit ->
                     ResponseStatsDto.builder()
                             .app(hit[0].toString())
@@ -56,7 +57,8 @@ public class StatsServiceImpl implements StatsService {
         }
     }
 
-    public boolean checkIp(String ip, String uri){
-        return statsRepository.existsByIpAndUri(ip,uri);
+    public boolean checkIp(String ip, String uri) {
+        return statsRepository.existsByIpAndUri(ip, uri);
+
     }
 }

@@ -39,7 +39,7 @@ public class StatsController {
     }
 
     @GetMapping(path = "/stats/check")
-    public boolean checkIp(@RequestParam String ip, @RequestParam String uri){
+    public boolean checkIp(@RequestParam String ip, @RequestParam String uri) {
         return statsService.checkIp(ip, uri);
     }
 }
