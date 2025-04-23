@@ -7,7 +7,7 @@ import ru.practicum.request.dto.ParticipationRequestDto;
 import java.util.Collection;
 import java.util.List;
 
-@Transactional(readOnly = true)
+
 public interface EventService {
 
     EventFullDto getEventById(long eventId);

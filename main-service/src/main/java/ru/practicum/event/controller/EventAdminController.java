@@ -33,8 +33,8 @@ public class EventAdminController {
                                   @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeStart,
                                   @RequestParam(required = false)
                                   @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
-                                  @RequestParam(required = false, defaultValue = "0") @PositiveOrZero Integer from,
-                                  @RequestParam(required = false, defaultValue = "10") @Positive Integer size) {
+                                  @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
+                                  @RequestParam(defaultValue = "10") @Positive Integer size) {
         log.info("Запрос списка событий: usersId {}, states {}, categoriesOd {}, rangeStart {}," +
                         " rangeEnd {}, from {}, size {}", users, states, categories, rangeStart,
                 rangeEnd, from, size);

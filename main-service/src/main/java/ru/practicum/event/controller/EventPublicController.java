@@ -69,7 +69,7 @@ public class EventPublicController {
                 .timestamp(LocalDateTime.now().format(formatter))
                 .build();
         boolean checkIp = Boolean.TRUE.equals(statsClient.checkIp(request.getRemoteAddr(), request.getRequestURI()).block());
-        if (checkIp) {
+        if (!checkIp) {
             eventService.changeViews(eventId);
         }
 

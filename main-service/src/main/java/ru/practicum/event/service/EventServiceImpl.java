@@ -115,6 +115,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    @Transactional
     public void changeViews(Long id) {
         Event event = eventRepository.findById(id).get();
         event.setViews(event.getViews() + 1);

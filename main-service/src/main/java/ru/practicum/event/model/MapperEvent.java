@@ -1,7 +1,7 @@
 package ru.practicum.event.model;
 
 
-import org.springframework.stereotype.Component;
+import lombok.experimental.UtilityClass;
 import ru.practicum.category.model.Category;
 import ru.practicum.category.model.MapperCategory;
 import ru.practicum.event.dto.EventFullDto;
@@ -17,9 +17,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 
-@Component
+@UtilityClass
 public class MapperEvent {
-
 
     public static EventFullDto toEventFullDto(Event event) {
         String published = Objects.nonNull(event.getPublishedOn()) ?
