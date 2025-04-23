@@ -195,7 +195,6 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<EventFullDto> search(EventSearchParameters parameters) {
         BooleanExpression expression = QEvent.event.id.gt(parameters.from());
 

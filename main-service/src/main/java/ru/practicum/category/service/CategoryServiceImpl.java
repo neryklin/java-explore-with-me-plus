@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.category.dto.CategoryDto;
 import ru.practicum.category.model.Category;
 import ru.practicum.category.model.MapperCategory;
@@ -37,12 +38,14 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @Transactional
     public CategoryDto create(CategoryDto dto) {
         Category category = MapperCategory.toCategory(dto);
         return MapperCategory.toCategoryDto(categoryRepository.save(category));
     }
 
     @Override
+    @Transactional
     public CategoryDto update(Long id, CategoryDto dto) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Категория с id " + id + " не найдена"));
@@ -51,6 +54,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @Transactional
     public void delete(Long id) {
         if (!categoryRepository.existsById(id)) {
             throw new EntityNotFoundException("Категория с id " + id + " не найдена");
