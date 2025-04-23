@@ -1,7 +1,6 @@
 package ru.practicum.stats_client;
 
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.UtilityClass;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriBuilder;
