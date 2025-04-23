@@ -25,7 +25,7 @@ public class StatsController {
     public Collection<ResponseStatsDto> getStats(@RequestParam String start,
                                                  @RequestParam String end,
                                                  @RequestParam(required = false) List<String> uris,
-                                                 @RequestParam(required = false, defaultValue = "false") Boolean unique) {
+                                                 @RequestParam(defaultValue = "false") Boolean unique) {
         log.info("GET запрос статистики  start= {}, end = {}, uris = {}, unique = {}",
                 start, end, uris, unique);
         return statsService.getStats(start, end, uris, unique);
@@ -36,5 +36,10 @@ public class StatsController {
     public ResponseHitDto createHit(@RequestBody @Valid CreateHitDto createHitDto) {
         log.info("POST Создаем hit {}", createHitDto);
         return statsService.create(createHitDto);
+    }
+
+    @GetMapping(path = "/stats/check")
+    public boolean checkIp(@RequestParam String ip, @RequestParam String uri) {
+        return statsService.checkIp(ip, uri);
     }
 }

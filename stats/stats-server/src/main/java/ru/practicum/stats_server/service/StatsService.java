@@ -16,4 +16,6 @@ public interface StatsService {
     @Transactional(readOnly = true)
     Collection<ResponseStatsDto> getStats(String start, String end, List<String> uris, Boolean unique);
 
+    boolean checkIp(String ip, String uri);
+
 }
