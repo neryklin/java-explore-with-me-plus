@@ -76,4 +76,12 @@ public class EventPublicController {
         statsClient.sendHit(hitDto);
         return eventService.getEventById(eventId);
     }
+
+    @GetMapping(path = "/loc/{locId}")
+    @ResponseStatus(HttpStatus.OK)
+    public Collection<EventShortDto> getEventByLocation(@PathVariable Long locId,
+                                                        @RequestParam(defaultValue = "1") Float maxDistance) {
+        log.info("GET Поиск событий по местоположению locId:{},maxDistance:{}", locId, maxDistance);
+        return eventService.findEventsByLoc(locId, maxDistance);
+    }
 }
