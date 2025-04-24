@@ -39,4 +39,6 @@ public interface EventService {
 
 
     Collection<ParticipationRequestDto> findAllRequestsByEventId(long userId, long eventId);
+
+    public Collection<EventShortDto> findEventsByLoc(Long locId, Float maxDistance);
 }

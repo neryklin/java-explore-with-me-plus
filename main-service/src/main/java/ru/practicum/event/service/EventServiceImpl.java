@@ -365,6 +365,14 @@ public class EventServiceImpl implements EventService {
         return result;
     }
 
+    @Override
+    public Collection<EventShortDto> findEventsByLoc(Long locId, Float maxDistance) {
+        Location location = locationRepository.findById(locId)
+                .orElseThrow(() -> new NotFoundException("Локация не найдена"));
+        Collection<Event> events = eventRepository.findEventsByLocation(location.getLat(), location.getLon(), maxDistance);
+        return events.stream().map(MapperEvent::toEventShortDto).toList();
+    }
+
 
     private void validateForPrivate(EventState eventState, StateActionUser stateActionUser) {
         if (eventState.equals(EventState.PUBLISHED)) {
